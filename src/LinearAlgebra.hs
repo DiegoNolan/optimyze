@@ -5,9 +5,13 @@ module LinearAlgebra
  , LinearSystem (LinSys)
  , fromLists
  , innerProduct
+ , transpose
  , multVM
  , multMV
  , multMM
+ , scalarM
+ , scalarV
+ , column
  , product
  , solLinSys
  ) where
@@ -40,9 +44,11 @@ innerProduct v1 v2 | V.length v1 /= V.length v2 =
     error "Not same length vectors"
 innerProduct v1 v2 = V.sum $ V.zipWith (*) v1 v2
 
+transpose :: Matrix -> Matrix
+transpose m = V.map (column m) (V.fromList [0..(V.length (m V.! 0) - 1)])
+
 multVM :: Vect -> Matrix -> Vect
-multVM v m = V.map (innerProduct v) cols
-    where cols = V.map (column m) (V.fromList [0..(V.length (m V.! 0) - 1)])
+multVM v m = V.map (innerProduct v) (transpose m)
 
 multMV :: Matrix -> Vect -> Vect
 multMV m v = V.map (innerProduct v) m
@@ -63,6 +69,8 @@ column mat j = column' mat j 0
                 | i >= V.length mat = V.empty
                 | otherwise         = ((mat V.! i) V.!j)
                         `V.cons` (column' mat j (i+1))
+
+
 
 -- Solving Linear Systems of Equations
 solLinSys :: LinearSystem -> Vect
