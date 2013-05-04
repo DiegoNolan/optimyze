@@ -6,6 +6,10 @@ module LinearProgramming
 import LinearAlgebra
 import qualified Data.Vector as V
 
+m = fromLists [[1,0,1,-1],[0,1,-1,2]]
+
+b = V.fromList [2,1] :: Vect
+
 {- Solves the following
  - \[ \min c^T x \]
  - \[ \text{s.t.} Ax = b \]
@@ -21,14 +25,15 @@ simplexMethod c a b
     | otherwise = Nothing
 
 -- list of tuples of decision variable indices and their corresponding matrix
---feasBases :: Matrix -> Vect -> [(V.Vector Int, Matrix)]
-feasBases mat b = V.replicateM 2 (V.fromList [0..dvc])
-    where dvc = (V.length $ V.head mat) - 1
+feasBases :: Matrix -> Vect -> [([Int], Matrix)]
+feasBases mat b = filter (\(_,m) -> isFeasBasis (LinSys m b)) allBases
+    where dvc       = (V.length $ V.head mat)
+          conc      = V.length mat
+          aInds     = combinations [0..(dvc-1)] conc
+          allBases  = map (\ind -> (ind, colsFromList mat ind)) aInds
 
 isFeasBasis :: LinearSystem -> Bool
 isFeasBasis lns = V.and (V.map (>=0) (solLinSys lns))
-
-
 
 -- Combination Related things
 combinations xs 1   = map (\y -> [y]) xs

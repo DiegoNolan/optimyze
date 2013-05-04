@@ -12,6 +12,7 @@ module LinearAlgebra
  , scalarM
  , scalarV
  , column
+ , colsFromList
  , product
  , solLinSys
  ) where
@@ -70,7 +71,8 @@ column mat j = column' mat j 0
                 | otherwise         = ((mat V.! i) V.!j)
                         `V.cons` (column' mat j (i+1))
 
-
+colsFromList :: Matrix -> [Int] -> Matrix
+colsFromList m inds = transpose ( V.fromList $ map (column m) inds)
 
 -- Solving Linear Systems of Equations
 solLinSys :: LinearSystem -> Vect
