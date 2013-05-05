@@ -6,6 +6,7 @@ module LinearAlgebra
  , fromLists
  , innerProduct
  , transpose
+ , minusVV
  , multVM
  , multMV
  , multMM
@@ -13,6 +14,8 @@ module LinearAlgebra
  , scalarV
  , column
  , colsFromList
+ , subFromList
+ , indOfMax
  , product
  , solLinSys
  ) where
@@ -48,6 +51,9 @@ innerProduct v1 v2 = V.sum $ V.zipWith (*) v1 v2
 transpose :: Matrix -> Matrix
 transpose m = V.map (column m) (V.fromList [0..(V.length (m V.! 0) - 1)])
 
+minusVV :: Vect -> Vect -> Vect
+minusVV v1 v2 = V.zipWith (-) v1 v2
+
 multVM :: Vect -> Matrix -> Vect
 multVM v m = V.map (innerProduct v) (transpose m)
 
@@ -73,6 +79,17 @@ column mat j = column' mat j 0
 
 colsFromList :: Matrix -> [Int] -> Matrix
 colsFromList m inds = transpose ( V.fromList $ map (column m) inds)
+
+subFromList :: Vect -> [Int] -> Vect
+subFromList vs []      = V.empty
+subFromList vs (x:xs)  = (vs V.! x) `V.cons` subFromList vs xs
+
+indOfMax :: Vect -> Int
+indOfMax v = maxInd v 0 (V.head v) 0
+    where maxInd v i m mi
+                | v == V.empty      =  mi
+                | V.head v > m      = maxInd (V.drop 1 v) (i+1) (V.head v) i
+                | otherwise         = maxInd (V.drop 1 v) (i+1) m mi
 
 -- Solving Linear Systems of Equations
 solLinSys :: LinearSystem -> Vect
