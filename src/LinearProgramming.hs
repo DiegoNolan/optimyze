@@ -1,6 +1,7 @@
 
 module LinearProgramming
- (
+ ( 
+ 
  ) where
 
 import LinearAlgebra
@@ -35,21 +36,22 @@ simplexMeth c a b bases
     | (not . V.and) $ V.map (>=0) xb = simplexMeth c a b (drop 1 bases)
     | V.and $ V.map (<=0) rc         = Just (fullVector xb xbi xni)
     | otherwise                      = simplexMeth c a b ((newbasi,newB): drop 1 bases)
-        where (xbi,bas) = head bases
-              xb        = solLinSys (LinSys bas b)
-              xni       = indexComp xbi ((V.length $ V.head a) - 1)
-              nonb      = transpose $ colsFromList a xni
-              cb        = subFromList c xbi
+        where (xbi,bas) = head bases 
+              xb        = solLinSys (LinSys bas b)  -- basis vector
+              xni       = indexComp xbi ((V.length $ V.head a) - 1) --indices of non-basis variables
+              nonb      = transpose $ colsFromList a xni -- non-basic vecto
+              cb        = subFromList c xbi 
               cn        = subFromList c xni 
               mults     = solLinSys $ LinSys (transpose bas) cb -- Lagrange mults
-              rc        = cn `minusVV` (multMV nonb mults)
+              rc        = cn `minusVV` (multMV nonb mults) -- reduced costs
               ent       = indOfMax rc -- index to enter basis
               d         = solLinSys $ LinSys bas (column a ent) -- direction
-              ratio     = V.zipWith (/) xb d
-              leave     = xbi !! (indOfMax ratio)
-              newbasi   = addOrd (delete leave xbi) ent
-              newB      = colsFromList a newbasi
+              ratio     = V.zipWith (/) xb d -- ratio test
+              leave     = xbi !! (indOfMax ratio) -- index to leave
+              newbasi   = addOrd (delete leave xbi) ent -- new basis indices
+              newB      = colsFromList a newbasi -- new basic matrix
 
+-- concat zeros onto 
 fullVector :: Vect -> [Int] -> [Int] -> Vect
 fullVector vs [] ns     = V.replicate (length ns) 0
 fullVector vs bs []     = vs
